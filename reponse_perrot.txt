@@ -1,0 +1,39 @@
+Bonjour,
+
+Alors, a priori, c’est simple, mais en réalité c’est assez complexe.
+Et cela dépend surtout du système de fichiers (FS) dont il est question.
+Je suppose qu’on se limite aux FS de type ext2/3/4.
+
+1. Quand un fichier est supprimé, en réalité, les données ne sont pas supprimées/ré-écrites, mais son i-node est simplement retiré de la liste des i-nodes les blocs du disque qu’il occupait sont considérés comme de nouveau libres.
+N’importe quel	autre programme peut alors écrire dedans et c’est bien à ce moment là que les données seront définitivement perdues.
+
+2. Tant que les blocs concernés sur le disque dur (DD) n’ont pas été ré-employés, les données qu’ils contiennentsont a priori récupérables.
+
+3. Pour les récupérer, il faut globalement connaître la structure du FS et parcours les blocs à la recherche d’entêtes (Magic numbers) de types de fichiers connues. Généralement, les noms des fichiers sont perdus, sauf s’ils sont également enregistrés dans le fichier lui même. Pour lire les blocs, on peut simplement utiliser la primitive read() sur la partition où ils se trouvent (/dev/sdaX). Toutefois, il est plus sage de faire une copie image (avec la commande dd) et de travailler sur cette image, cela évite de détériorer le DD et/ou les données.
+
+Le mieux est de s’entrainer en créant par exemple une image de disque de petite taille (sur un vrai disque dur, cela peut être extrêmement long) puis en créant un FS dessus.
+
+Exemple :
+Créez un point de montage : $ mkdir mountPoint
+Créez une image vierge de 10Mo avec une taille de blocs de 4Ko: $ dd if=/dev/zero of=imgDD bs=4096 count=2560      
+Créez un FS dedans (sudo ?) : $ mkfs.ext2 imgDD
+Montez l’image (sudo ?) : $ Mount -o loop imgDD mountPoint
+Changez les permissions pour vous attribuer les droits (sudo) : $ clown -R zulu:zulu mountPoint
+Remplissez le disque avec un gros fichier contenant plein de fois la même chaine : yes "ma chaine" > grosFichier.txt
+Maintenant vous pouvez supprimer le lien entre les données écrites (« ma chaine ma chaine ma ….) et le FS en supprimant le fichier (rm) : $ unlink grosFichier.txt 
+
+Maintenant à vous de lire les blocs et tenter de retrouver les données. Voici quelques liens utiles pour y arriver :
+
+http://shtroumbiniouf.free.fr/CoursInfo/Systeme2/Cours/SGFUnix/FileSystems/ext2/ext2.html
+
+http://www.cs.albany.edu/~sdc/CSI500/Fal12/Labs/FSLab1/SuperReading2.html
+
+http://www.science.smith.edu/~nhowe/teaching/csc262/oldlabs/ext2.html
+
+https://courses.cs.washington.edu/courses/cse451/09sp/projects/project3light/project3_light.html
+
+https://www.nongnu.org/ext2-doc/ext2.html
+
+
+Bonne exploration, tenez-moi au courant de vos progrès.
+Très bonne journée et à demain.
