@@ -18,12 +18,12 @@ echo "Création du point de montage - ok"
 
 #Copie de la clé
 echo "Copie du support de stockage $1 passé en paramètre..." #6 minutes pour la copie
-#dd if=$1 of=cle status=progress
+dd if=$1 of=cle.dd status=progress
 echo "Copie du support de stockage $1 passé en paramètre - ok"
 
 #Montage de la copie du support de stockage
 echo "Montage de la copie du support de stockage..."
-#mount -o loop cle usb
+mount -o loop cle usb
 echo "Montage de la copie du support de stockage - ok"
 
 #Affichage des informations sur le support de stockage
